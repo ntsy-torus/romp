@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  romp-api:
+    build: .
+    container_name: romp-api
+    volumes:
+      - ./models:/app/models
+      - ./results:/app/results
+      - ./romp_models:/app/romp_models
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    devices:
+      - /dev/video0:/dev/video0
+    environment:
+      - DISPLAY=$DISPLAY
+      - NVIDIA_VISIBLE_DEVICES=all
+    gpus: all
+    privileged: true
+    restart: unless-stopped
+
+  # Optional: Add a simple web interface for testing
+  romp-web:
+    image: nginx:alpine
+    container_name: romp-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./web:/usr/share/nginx/html
+    depends_on:
+      - romp-api
+    restart: unless-stopped
+
+volumes:
+  models:
+  results:
